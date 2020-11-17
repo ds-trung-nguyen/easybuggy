@@ -2,6 +2,7 @@ package org.t246osslab.easybuggy.vulnerabilities;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Locale;
@@ -62,12 +63,21 @@ public class SQLInjectionServlet extends AbstractServlet {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
+        String sql = "SELECT name, secret FROM users WHERE ispublic = 'true' AND name=? AND password=?";
+        
         String result = getErrMsg("msg.error.user.not.exist", req.getLocale());
         try {
             conn = DBClient.getConnection();
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery("SELECT name, secret FROM users WHERE ispublic = 'true' AND name='" + name
-                    + "' AND password='" + password + "'");
+//            stmt = conn.createStatement();
+//            rs = stmt.executeQuery("SELECT name, secret FROM users WHERE ispublic = 'true' AND name='" + name
+//                    + "' AND password='" + password + "'");
+            
+            PreparedStatement pstatement = conn.prepareStatement(sql);
+            pstatement.setString(1, name);
+            pstatement.setString(2, password);
+            
+            rs = pstatement.executeQuery();
+
             StringBuilder sb = new StringBuilder();
             while (rs.next()) {
                 sb.append("<tr><td>" + rs.getString("name") + "</td><td>" + rs.getString("secret") + "</td></tr>");
