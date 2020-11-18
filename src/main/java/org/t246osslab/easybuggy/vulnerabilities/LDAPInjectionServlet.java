@@ -1,6 +1,8 @@
 package org.t246osslab.easybuggy.vulnerabilities;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -34,10 +36,16 @@ public class LDAPInjectionServlet extends DefaultLoginServlet {
             return false;
         }
         
+        //validate username 
+        if(validateUsername(uid)) {
+        	return false;
+        }
+        
         ExprNode filter;
         EntryFilteringCursor cursor = null;
         try {
             filter = FilterParser.parse("(&(uid=" + uid.trim() + ")(userPassword=" + password.trim() + "))");
+         
             cursor = EmbeddedADS.getAdminSession().search(new LdapDN("ou=people,dc=t246osslab,dc=org"),
                     SearchScope.SUBTREE, filter, AliasDerefMode.NEVER_DEREF_ALIASES, null);
             if (cursor.available()) {
@@ -56,4 +64,11 @@ public class LDAPInjectionServlet extends DefaultLoginServlet {
         }
         return false;
     }
+    
+    private boolean validateUsername(String username) {
+    	String regex = "[*()^+&#@!~]";
+    	Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);//. represents single character  
+    	return p.matcher(username).find();  
+    }
+
 }

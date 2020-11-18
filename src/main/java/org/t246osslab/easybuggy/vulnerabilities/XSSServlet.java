@@ -104,8 +104,12 @@ public class XSSServlet extends AbstractServlet {
 			// Avoid onload= expressions
 			scriptPattern = Pattern.compile("onload(.*?)=", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
 			result = scriptPattern.matcher(result).replaceAll("");
+			
+			//if tag html -> validate
+			result = Pattern.compile("<(\"[^\"]*\"|'[^']*'|[^'\">])*>").matcher(result).replaceAll("");
+						
 		}
-		System.out.println(result);
 		return result;
 	}
+
 }
